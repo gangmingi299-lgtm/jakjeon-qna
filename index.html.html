@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>작전고등학교 질문 게시판 🏫</title>
+    <style>
+        :root {
+            --primary-color: #1a56db;
+            --primary-hover: #1e429f;
+            --bg-color: #f3f4f6;
+            --card-bg: #fff;
+            --text-color: #1f2937;
+            --border-color: #e5e7eb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #1a56db, #3b82f6);
+            color: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        .form-section h2 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+
+        .form-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 140px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #4b5563;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary-color);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .filter-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .filters, .sorts {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn, .sort-btn {
+            background: white;
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .filter-btn.active, .sort-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .posts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .post-card {
+            background: #fffbeb;
+            border: 1px solid #fef3c7;
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            transition: transform 0.2s;
+        }
+
+        .post-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .badge.math { background: #fee2e2; color: #991b1b; }
+        .badge.kor { background: #e0f2fe; color: #0369a1; }
+        .badge.eng { background: #fef3c7; color: #92400e; }
+        .badge.sci { background: #d1fae5; color: #065f46; }
+        .badge.soc { background: #f3e8ff; color: #6b21a8; }
+        .badge.etc { background: #f3f4f6; color: #374151; }
+
+        .grade-badge {
+            font-size: 0.75rem;
+            background: #e5e7eb;
+            color: #4b5563;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #9ca3af;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 0 5px;
+        }
+
+        .delete-btn:hover {
+            color: #ef4444;
+            background: none;
+        }
+
+        .post-content {
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+            word-break: break-all;
+            white-space: pre-wrap;
+        }
+
+        .post-footer {
+            border-top: 1px dashed #fcd34d;
+            padding-top: 10px;
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+
+        .post-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .like-btn {
+            background: white;
+            border: 1px solid #d1d5db;
+            color: #374151;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+
+        .like-btn:hover {
+            background: #f3f4f6;
+        }
+
+        .status-resolved {
+            background: #d1fae5 !important;
+            border-color: #a7f3d0 !important;
+        }
+
+        .comments-section {
+            margin-top: 12px;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 8px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .comment-item {
+            font-size: 0.8rem;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 6px 8px;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .comment-input-area {
+            display: flex;
+            gap: 5px;
+            margin-top: 8px;
+        }
+
+        .comment-input-area input {
+            padding: 6px;
+            font-size: 0.8rem;
+        }
+
+        .comment-input-area button {
+            padding: 6px 10px;
+            font-size: 0.8rem;
+        }
+
+        /* 모달 스타일 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            width: 300px;
+            text-align: center;
+        }
+        .modal-content input {
+            margin: 10px 0;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>작전고등학교 질문 게시판 🏫</h1>
+            <p>야자나 자습할 때 막히는 문제, 다 같이 해결해 봐요!</p>
+        </header>
+
+        <!-- 질문 등록 폼 -->
+        <div class="card form-section">
+            <h2>✍️ 질문 남기기</h2>
+            <form id="questionForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="grade">학년/반</label>
+                        <select id="grade" required>
+                            <option value="1학년">1학년</option>
+                            <option value="2학년">2학년</option>
+                            <option value="3학년">3학년</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="subject">과목</label>
+                        <select id="subject" required>
+                            <option value="math">수학</option>
+                            <option value="kor">국어</option>
+                            <option value="eng">영어</option>
+                            <option value="sci">과학</option>
+                            <option value="soc">사회/한국사</option>
+                            <option value="etc">기타</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">비밀번호 (4자리)</label>
+                        <input type="password" id="password" maxlength="4" placeholder="1234" required>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <label for="content">질문 내용</label>
+                    <textarea id="content" placeholder="예: 수학 부교재 45페이지 3번 풀이 과정 이해가 안 가요ㅠ" required></textarea>
+                </div>
+                <button type="submit">질문 등록하기</button>
+            </form>
+        </div>
+
+        <!-- 필터 및 정렬 바 -->
+        <div class="filter-bar">
+            <div class="filters">
+                <button class="filter-btn active" data-filter="all">전체</button>
+                <button class="filter-btn" data-filter="math">수학</button>
+                <button class="filter-btn" data-filter="kor">국어</button>
+                <button class="filter-btn" data-filter="eng">영어</button>
+                <button class="filter-btn" data-filter="sci">과학</button>
+                <button class="filter-btn" data-filter="soc">사회/한국사</button>
+            </div>
+            <div class="sorts">
+                <button class="sort-btn active" data-sort="latest">최신순</button>
+                <button class="sort-btn" data-sort="likes">공감순</button>
+            </div>
+        </div>
+
+        <!-- 질문 카드 목록 -->
+        <div id="postsContainer" class="posts-grid">
+            <!-- 자바스크립트로 동적 생성 -->
+        </div>
+    </div>
+
+    <!-- 비밀번호 확인 모달 -->
+    <div id="passwordModal" class="modal">
+        <div class="modal-content">
+            <h3>비밀번호 확인</h3>
+            <p style="font-size:0.85rem; color:#6b7280; margin-top:5px;">등록할 때 입력한 4자리 비밀번호를 입력하세요.</p>
+            <input type="password" id="modalPassword" maxlength="4" placeholder="비밀번호">
+            <div class="modal-buttons">
+                <button id="modalConfirmBtn" style="background:#ef4444;">확인</button>
+                <button id="modalCancelBtn" style="background:#9ca3af;">취소</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 초기 샘플 데이터
+        const defaultPosts = [
+            {
+                id: 1,
+                grade: "1학년",
+                subject: "math",
+                content: "수학 집합 단원 공집합 부분집합 개수 구하는 공식 유도 과정 다시 설명해 줄 사람?",
+                password: "1234",
+                likes: 5,
+                resolved: false,
+                comments: [
+                    { id: 101, text: "2의 n제곱에서 n이 원소 개수잖아!", password: "11" }
+                ],
+                createdAt: Date.now() - 3600000
+            },
+            {
+                id: 2,
+                grade: "1학년",
+                subject: "eng",
+                content: "영어 부교재 지문 12번 해석 3번째 줄 단어 뜻 아시는 분?",
+                password: "1234",
+                likes: 2,
+                resolved: true,
+                comments: [],
+                createdAt: Date.now() - 7200000
+            }
+        ];
+
+        let posts = JSON.parse(localStorage.getItem('jakjeon_qna_posts')) || defaultPosts;
+        let currentFilter = 'all';
+        let currentSort = 'latest';
+        
+        let targetAction = null; // { type: 'deletePost'/'deleteComment'/'toggleResolve', postId, commentId }
+
+        const subjectNames = {
+            math: '수학',
+            kor: '국어',
+            eng: '영어',
+            sci: '과학',
+            soc: '사회/한국사',
+            etc: '기타'
+        };
+
+        const questionForm = document.getElementById('questionForm');
+        const postsContainer = document.getElementById('postsContainer');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const sortBtns = document.querySelectorAll('.sort-btn');
+
+        const modal = document.getElementById('passwordModal');
+        const modalPassword = document.getElementById('modalPassword');
+        const modalConfirmBtn = document.getElementById('modalConfirmBtn');
+        const modalCancelBtn = document.getElementById('modalCancelBtn');
+
+        // 질문 등록
+        questionForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const grade = document.getElementById('grade').value;
+            const subject = document.getElementById('subject').value;
+            const password = document.getElementById('password').value;
+            const content = document.getElementById('content').value;
+
+            if (password.length !== 4) {
+                alert('비밀번호 4자리를 정확히 입력해주세요!');
+                return;
+            }
+
+            const newPost = {
+                id: Date.now(),
+                grade,
+                subject,
+                password,
+                content,
+                likes: 0,
+                resolved: false,
+                comments: [],
+                createdAt: Date.now()
+            };
+
+            posts.unshift(newPost);
+            saveAndRender();
+            questionForm.reset();
+        });
+
+        // 렌더링 함수
+        function renderPosts() {
+            postsContainer.innerHTML = '';
+
+            let filtered = posts.filter(post => {
+                if (currentFilter === 'all') return true;
+                return post.subject === currentFilter;
+            });
+
+            filtered.sort((a, b) => {
+                if (currentSort === 'latest') {
+                    return b.createdAt - a.createdAt;
+                } else if (currentSort === 'likes') {
+                    return b.likes - a.likes;
+                }
+            });
+
+            if (filtered.length === 0) {
+                postsContainer.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #6b7280; padding: 40px;">등록된 질문이 없습니다. 첫 질문을 남겨보세요!</p>`;
+                return;
+            }
+
+            filtered.forEach(post => {
+                const card = document.createElement('div');
+                card.className = `post-card ${post.resolved ? 'status-resolved' : ''}`;
+                
+                let commentsHtml = '';
+                post.comments.forEach(comment => {
+                    commentsHtml += `
+                        <div class="comment-item">
+                            <span>💬 ${escapeHtml(comment.text)}</span>
+                            <button class="delete-btn" onclick="requestDeleteComment(${post.id}, ${comment.id})" style="font-size:0.7rem;">✕</button>
+                        </div>
+                    `;
+                });
+
+                card.innerHTML = `
+                    <div>
+                        <div class="post-header">
+                            <div>
+                                <span class="badge ${post.subject}">${subjectNames[post.subject]}</span>
+                                <span class="grade-badge">${post.grade}</span>
+                            </div>
+                            <button class="delete-btn" onclick="requestDeletePost(${post.id})" title="삭제">✕</button>
+                        </div>
+                        <div class="post-content">${escapeHtml(post.content)}</div>
+                    </div>
+                    <div>
+                        <div class="comments-section">
+                            ${commentsHtml.length > 0 ? commentsHtml : '<div style="font-size:0.75rem; color:#9ca3af; text-align:center;">아직 달린 힌트가 없어요</div>'}
+                        </div>
+                        <div class="comment-input-area">
+                            <input type="text" id="comment-text-${post.id}" placeholder="힌트 입력...">
+                            <input type="password" id="comment-pw-${post.id}" maxlength="4" placeholder="비번" style="width: 50px;">
+                            <button onclick="addComment(${post.id})">등록</button>
+                        </div>
+                        <div class="post-actions">
+                            <button class="like-btn" onclick="likePost(${post.id})">👍 나도 몰라 (${post.likes})</button>
+                            <button class="like-btn" onclick="requestToggleResolve(${post.id})" style="background:${post.resolved ? '#10b981' : 'white'}; color:${post.resolved ? 'white' : '#374151'}">
+                                ${post.resolved ? '✅ 해결됨' : '💡 미해결'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+                postsContainer.appendChild(card);
+            });
+        }
+
+        function saveAndRender() {
+            localStorage.setItem('jakjeon_qna_posts', JSON.stringify(posts));
+            renderPosts();
+        }
+
+        // 좋아요(나도 몰라)
+        function likePost(id) {
+            const post = posts.find(p => p.id === id);
+            if (post) {
+                post.likes++;
+                saveAndRender();
+            }
+        }
+
+        // 힌트 추가
+        function addComment(postId) {
+            const textInput = document.getElementById(`comment-text-${postId}`);
+            const pwInput = document.getElementById(`comment-pw-${postId}`);
+            
+            const text = textInput.value.trim();
+            const password = pwInput.value;
+
+            if (!text) {
+                alert('힌트 내용을 입력해주세요!');
+                return;
+            }
+            if (password.length !== 4) {
+                alert('비밀번호 4자리를 입력해주세요!');
+                return;
+            }
+
+            const post = posts.find(p => p.id === id);
+            if (post) {
+                post.comments.push({
+                    id: Date.now(),
+                    text,
+                    password
+                });
+                saveAndRender();
+            }
+        }
+
+        // 삭제 및 상태변경 요청을 위한 모달 오픈
+        function requestDeletePost(postId) {
+            targetAction = { type: 'deletePost', postId };
+            openModal();
+        }
+
+        function requestDeleteComment(postId, commentId) {
+            targetAction = { type: 'deleteComment', postId, commentId };
+            openModal();
+        }
+
+        function requestToggleResolve(postId) {
+            targetAction = { type: 'toggleResolve', postId };
+            openModal();
+        }
+
+        function openModal() {
+            modalPassword.value = '';
+            modal.style.display = 'flex';
+            modalPassword.focus();
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
+            targetAction = null;
+        }
+
+        modalCancelBtn.addEventListener('click', closeModal);
+
+        // 모달 비밀번호 확인 버튼
+        modalConfirmBtn.addEventListener('click', () => {
+            const inputPw = modalPassword.value;
+            if (!targetAction) return;
+
+            const post = posts.find(p => p.id === targetAction.postId);
+            if (!post) {
+                closeModal();
+                return;
+            }
+
+            if (targetAction.type === 'deletePost') {
+                if (post.password === inputPw) {
+                    posts = posts.filter(p => p.id === targetAction.postId);
+                    saveAndRender();
+                    closeModal();
+                } else {
+                    alert('비밀번호가 일치하지 않습니다!');
+                }
+            } else if (targetAction.type === 'deleteComment') {
+                const comment = post.comments.find(c => c.id === targetAction.commentId);
+                if (comment && comment.password === inputPw) {
+                    post.comments = post.comments.filter(c => c.id !== targetAction.commentId);
+                    saveAndRender();
+                    closeModal();
+                } else {
+                    alert('비밀번호가 일치하지 않습니다!');
+                }
+            } else if (targetAction.type === 'toggleResolve') {
+                if (post.password === inputPw) {
+                    post.resolved = !post.resolved;
+                    saveAndRender();
+                    closeModal();
+                } else {
+                    alert('비밀번호가 일치하지 않습니다!');
+                }
+            }
+        });
+
+        // 필터 및 정렬 이벤트
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.getAttribute('data-filter');
+                renderPosts();
+            });
+        });
+
+        sortBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                sortBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentSort = btn.getAttribute('data-sort');
+                renderPosts();
+            });
+        });
+
+        function escapeHtml(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            );
+        }
+
+        // 초기 렌더링
+        renderPosts();
+    </script>
+</body>
+</html>
